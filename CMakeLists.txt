@@ -52,13 +52,24 @@ find_package(tf2_ros REQUIRED)
 find_package(livox_ros_driver2 REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(glog REQUIRED)
+# OpenMP: clang uses libomp (-fopenmp=libomp) while GCC uses libgomp (-fopenmp).
+# CMake's FindOpenMP probes with -fopenmp by default, which silently fails on
+# clang. Pre-set the hint variables so FindOpenMP resolves correctly for clang.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  set(OpenMP_CXX_FLAGS "-fopenmp=libomp")
+  set(OpenMP_C_FLAGS   "-fopenmp=libomp")
+  set(OpenMP_CXX_LIB_NAMES "libomp")
+  set(OpenMP_C_LIB_NAMES   "libomp")
+  find_library(OpenMP_libomp_LIBRARY NAMES omp libomp
+    HINTS /usr/lib/llvm-18/lib /usr/lib/aarch64-linux-gnu /usr/lib/x86_64-linux-gnu)
+endif()
 find_package(OpenMP QUIET)
 find_package(PythonLibs REQUIRED) # Consider using Pybind11 for ROS2
 find_path(MATPLOTLIB_CPP_INCLUDE_DIRS "matplotlibcpp.h")
 
-if(OPENMP_FOUND)
+if(OpenMP_FOUND)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS}   ${OpenMP_C_FLAGS}")
 endif()
 
 include_directories(
