@@ -61,7 +61,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   set(OpenMP_CXX_LIB_NAMES "libomp")
   set(OpenMP_C_LIB_NAMES   "libomp")
   find_library(OpenMP_libomp_LIBRARY NAMES omp libomp
-    HINTS /usr/lib/llvm-18/lib /usr/lib/aarch64-linux-gnu /usr/lib/x86_64-linux-gnu)
+    HINTS
+      /usr/lib/llvm-${CMAKE_CXX_COMPILER_VERSION_MAJOR}/lib
+      /usr/lib/aarch64-linux-gnu
+      /usr/lib/x86_64-linux-gnu)
 endif()
 find_package(OpenMP QUIET)
 find_package(PythonLibs REQUIRED) # Consider using Pybind11 for ROS2
