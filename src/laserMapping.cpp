@@ -12,6 +12,7 @@
 #include <nav_msgs/msg/path.hpp>
 
 #include "li_initialization.h"
+#include "parameters.h"
 
 using namespace std;
 
@@ -339,8 +340,8 @@ void publish_odometry(const rclcpp::Publisher<
                           nav_msgs::msg::Odometry>::SharedPtr& pubOdomAftMapped,
                       std::shared_ptr<tf2_ros::TransformBroadcaster>& tf_br)
 {
-  odomAftMapped.header.frame_id = "camera_init";
-  odomAftMapped.child_frame_id = "body";
+  odomAftMapped.header.frame_id = camera_init_frame;
+  odomAftMapped.child_frame_id = body_frame;
   if (publish_odometry_without_downsample)
   {
     odomAftMapped.header.stamp = get_ros_time(time_current);
@@ -356,8 +357,8 @@ void publish_odometry(const rclcpp::Publisher<
   if (tf_send_en)
   {
     geometry_msgs::msg::TransformStamped transform;
-    transform.header.frame_id = "camera_init";
-    transform.child_frame_id = "aft_mapped";
+    transform.header.frame_id = camera_init_frame;
+    transform.child_frame_id = aft_mapped_frame;
     transform.transform.translation.x = odomAftMapped.pose.pose.position.x;
     transform.transform.translation.y = odomAftMapped.pose.pose.position.y;
     transform.transform.translation.z = odomAftMapped.pose.pose.position.z;
@@ -376,7 +377,7 @@ void publish_path(
   set_posestamp(msg_body_pose.pose);
   // msg_body_pose.header.stamp = ros::Time::now();
   msg_body_pose.header.stamp = get_ros_time(lidar_end_time);
-  msg_body_pose.header.frame_id = "camera_init";
+  msg_body_pose.header.frame_id = camera_init_frame;
   static int jjj = 0;
   jjj++;
   // if (jjj % 2 == 0) // if path is too large, the rvis will crash
@@ -395,11 +396,11 @@ int main(int argc, char** argv)
   executor.add_node(nh);
 
   readParameters(nh);
-  std::cout << "lidar_type: " << lidar_type << '\n';
+  RCLCPP_INFO(LOGGER, "lidar_type: %d", lidar_type);
   ivox_ = std::make_shared<IVoxType>(ivox_options_);
 
   path.header.stamp = get_ros_time(lidar_end_time);
-  path.header.frame_id = "camera_init";
+  path.header.frame_id = camera_init_frame;
 
   /*** variables definition for counting ***/
   int    frame_num = 0;
@@ -451,6 +452,8 @@ int main(int argc, char** argv)
   open_file();
 
   /*** ROS subscribe initialization ***/
+
+  // Lidar Point Cloud
   rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr sub_pcl_pc;
   rclcpp::Subscription<livox_ros_driver2::msg::CustomMsg>::SharedPtr
       sub_pcl_livox;
@@ -472,21 +475,28 @@ int main(int argc, char** argv)
           standard_pcl_cbk(msg);
         });
   }
+
+  // IMU Sub
   auto sub_imu = nh->create_subscription<sensor_msgs::msg::Imu>(
       imu_topic, rclcpp::SensorDataQoS(), imu_cbk);
+
+  // Clould Pub
+  // clould_registered: clould after registration, in the world frame
+  // clould_registered_body: clould after registration, in the body(IMU) frame
+  // clould_effected: UNUSED
   auto pub_laser_cloud_full_res =
-      nh->create_publisher<sensor_msgs::msg::PointCloud2>("cloud_registered",
-                                                          20);
+      nh->create_publisher<sensor_msgs::msg::PointCloud2>(
+          cloud_registered_topic, 20);
   auto pub_laser_cloud_full_res_body =
       nh->create_publisher<sensor_msgs::msg::PointCloud2>(
-          "cloud_registered_body", 20);
+          cloud_registered_body_topic, 20);
   auto pub_laser_cloud_effect =
       nh->create_publisher<sensor_msgs::msg::PointCloud2>("cloud_effected", 20);
   auto pub_laser_cloud_map =
-      nh->create_publisher<sensor_msgs::msg::PointCloud2>("Laser_map", 20);
-  auto pub_odom_aft_mapped =
-      nh->create_publisher<nav_msgs::msg::Odometry>("aft_mapped_to_init", 20);
-  auto pub_path = nh->create_publisher<nav_msgs::msg::Path>("path", 20);
+      nh->create_publisher<sensor_msgs::msg::PointCloud2>(laser_map_topic, 20);
+  auto pub_odom_aft_mapped = nh->create_publisher<nav_msgs::msg::Odometry>(
+      aft_mapped_to_init_topic, 20);
+  auto pub_path = nh->create_publisher<nav_msgs::msg::Path>(path_topic, 20);
   auto tf_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(nh);
 
   //------------------------------------------------------------------------------------------------------

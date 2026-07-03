@@ -31,59 +31,68 @@
 #ifdef IVOX_NODE_TYPE_PHC
 using IVoxType = faster_lio::IVox<3, faster_lio::IVoxNodeType::PHC, PointType>;
 #else
-using IVoxType = faster_lio::IVox<3, faster_lio::IVoxNodeType::DEFAULT, PointType>;
+using IVoxType =
+    faster_lio::IVox<3, faster_lio::IVoxNodeType::DEFAULT, PointType>;
 #endif
 
-extern bool is_first_frame;
-extern double lidar_end_time, first_lidar_time, time_con;
-extern double last_timestamp_lidar, last_timestamp_imu;
-extern int pcd_index;
+extern bool              is_first_frame;
+extern double            lidar_end_time, first_lidar_time, time_con;
+extern double            last_timestamp_lidar, last_timestamp_imu;
+extern int               pcd_index;
 extern IVoxType::Options ivox_options_;
-extern int ivox_nearby_type;
-extern state_input state_in;
-extern state_output state_out;
-extern std::string lid_topic, imu_topic;
-extern bool prop_at_freq_of_imu, check_satu, con_frame, cut_frame;
-extern bool use_imu_as_input, space_down_sample;
-extern bool extrinsic_est_en, publish_odometry_without_downsample;
-extern int init_map_size, con_frame_num;
+extern int               ivox_nearby_type;
+extern state_input       state_in;
+extern state_output      state_out;
+
+// Topic name
+extern std::string lid_topic, imu_topic, cloud_registered_topic,
+    cloud_registered_body_topic, laser_map_topic, aft_mapped_to_init_topic,
+    path_topic;
+
+// Frame name
+extern std::string camera_init_frame, body_frame, aft_mapped_frame;
+
+extern bool   prop_at_freq_of_imu, check_satu, con_frame, cut_frame;
+extern bool   use_imu_as_input, space_down_sample;
+extern bool   extrinsic_est_en, publish_odometry_without_downsample;
+extern int    init_map_size, con_frame_num;
 extern double match_s, satu_acc, satu_gyro, cut_frame_time_interval;
-extern float plane_thr;
+extern float  plane_thr;
 extern double filter_size_surf_min, filter_size_map_min, fov_deg;
 // extern double cube_len;
-extern float DET_RANGE;
-extern bool imu_en;
-extern double imu_time_inte;
-extern double laser_point_cov, acc_norm;
-extern double acc_cov_input, gyr_cov_input, vel_cov;
-extern double gyr_cov_output, acc_cov_output, b_gyr_cov, b_acc_cov;
-extern double imu_meas_acc_cov, imu_meas_omg_cov;
-extern int lidar_type, pcd_save_interval;
+extern float               DET_RANGE;
+extern bool                imu_en;
+extern double              imu_time_inte;
+extern double              laser_point_cov, acc_norm;
+extern double              acc_cov_input, gyr_cov_input, vel_cov;
+extern double              gyr_cov_output, acc_cov_output, b_gyr_cov, b_acc_cov;
+extern double              imu_meas_acc_cov, imu_meas_omg_cov;
+extern int                 lidar_type, pcd_save_interval;
 extern std::vector<double> gravity_init, gravity;
-extern bool runtime_pos_log, pcd_save_en, path_en;
-extern bool scan_pub_en, scan_body_pub_en, tf_send_en;
+extern bool                runtime_pos_log, pcd_save_en, path_en;
+extern bool                scan_pub_en, scan_body_pub_en, tf_send_en;
 extern shared_ptr<Preprocess> p_pre;
 extern shared_ptr<ImuProcess> p_imu;
-extern bool is_first_frame;
+extern bool                   is_first_frame;
 
 extern std::vector<double> extrinT;
 extern std::vector<double> extrinR;
-extern double time_diff_lidar_to_imu;
-extern double lidar_time_inte, first_imu_time;
-extern int cut_frame_num, orig_odom_freq;
-extern double online_refine_time;  //unit: s
-extern bool cut_frame_init;
+extern double              time_diff_lidar_to_imu;
+extern double              lidar_time_inte, first_imu_time;
+extern int                 cut_frame_num, orig_odom_freq;
+extern double              online_refine_time; // unit: s
+extern bool                cut_frame_init;
 extern double time_update_last, time_current, time_predict_last_const, t_last;
 
-extern bool enable_prior_pcd;
-extern string prior_pcd_map_path;
+extern bool                enable_prior_pcd;
+extern string              prior_pcd_map_path;
 extern std::vector<double> init_pose;
 
 extern MeasureGroup Measures;
 
-extern ofstream fout_out, fout_imu_pbp;
-void readParameters(std::shared_ptr<rclcpp::Node> & n);
-void open_file();
-Eigen::Matrix<double, 3, 1> SO3ToEuler(const SO3 & orient);
-void reset_cov(Eigen::Matrix<double, 24, 24> & P_init);
-void reset_cov_output(Eigen::Matrix<double, 30, 30> & P_init_output);
+extern ofstream             fout_out, fout_imu_pbp;
+void                        readParameters(std::shared_ptr<rclcpp::Node>& n);
+void                        open_file();
+Eigen::Matrix<double, 3, 1> SO3ToEuler(const SO3& orient);
+void                        reset_cov(Eigen::Matrix<double, 24, 24>& P_init);
+void reset_cov_output(Eigen::Matrix<double, 30, 30>& P_init_output);
