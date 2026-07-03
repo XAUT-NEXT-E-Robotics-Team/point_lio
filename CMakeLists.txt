@@ -8,6 +8,8 @@ endif()
 ADD_COMPILE_OPTIONS(-std=c++17)
 set(CMAKE_CXX_FLAGS "-std=c++17 -O3")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 add_definitions(-DROOT_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/\")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fexceptions")
