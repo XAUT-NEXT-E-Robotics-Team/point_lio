@@ -233,7 +233,7 @@ void publish_init_map(
   pcl::toROSMsg(*init_feats_world, laserCloudmsg);
 
   laserCloudmsg.header.stamp = get_ros_time(lidar_end_time);
-  laserCloudmsg.header.frame_id = "camera_init";
+  laserCloudmsg.header.frame_id = camera_init_frame;
   pubLaserCloudFullRes->publish(laserCloudmsg);
 }
 
@@ -249,7 +249,7 @@ void                publish_frame_world(
     pcl::toROSMsg(*feats_down_world, laserCloudmsg);
 
     laserCloudmsg.header.stamp = get_ros_time(lidar_end_time);
-    laserCloudmsg.header.frame_id = "camera_init";
+    laserCloudmsg.header.frame_id = camera_init_frame;
     pubLaserCloudFullRes->publish(laserCloudmsg);
 
     //--------------------------save map-----------------------------------
